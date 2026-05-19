@@ -19,6 +19,22 @@ You play as a high-ranking demon cultivating **Terror**, **Corruption**, and **C
 
 ## Quick Start 🚀
 
+Open the browser terminal:
+
+```bash
+python3 -m http.server 4173
+```
+
+Then visit:
+
+```text
+http://localhost:4173
+```
+
+The static terminal app can also be served directly by GitHub Pages from the repository root.
+
+Run the Python CLI:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -39,6 +55,8 @@ python -m pandemonium_modern_ruin --seed 666 --demo
 ```
 
 ## Core Commands 🎮
+
+The browser terminal and Python CLI share the same command vocabulary:
 
 ```text
 status                 Show city, resources, threat, and subsystem health.
@@ -68,6 +86,7 @@ pandemonium> status
 
 The codebase is organized around a clean separation of concerns:
 
+- `index.html` and `assets/` provide a static GitHub Pages terminal edition that mirrors the CLI game loop in the browser.
 - `pandemonium_modern_ruin.city` owns the city aggregate, turn advancement, morale, cascades, response, and ruin checks.
 - `pandemonium_modern_ruin.subsystems` models civic infrastructure nodes and their coupling graph.
 - `pandemonium_modern_ruin.resources` defines the sin economy ledger.

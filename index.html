@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pandemonium: Modern Ruin</title>
+    <meta
+      name="description"
+      content="A browser terminal edition of Pandemonium: Modern Ruin, a deterministic city-ruin sandbox simulation."
+    />
+    <link rel="icon" href="assets/sigil.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <main class="shell" aria-label="Pandemonium terminal">
+      <section class="console-frame">
+        <header class="console-header">
+          <div class="brand">
+            <img class="brand-mark" src="assets/sigil.svg" alt="" width="42" height="42" />
+            <div>
+              <h1>Pandemonium: Modern Ruin</h1>
+              <p>Metropolitan Ruin Administration</p>
+            </div>
+          </div>
+          <div class="signal-strip" aria-label="system indicators">
+            <span id="signal-threat">THREAT 0.0</span>
+            <span id="signal-ruin">RUIN 14.4</span>
+            <span id="signal-turn">TURN 0</span>
+          </div>
+        </header>
+
+        <div class="terminal-layout">
+          <aside class="side-panel" aria-label="city telemetry">
+            <div class="panel-block">
+              <h2>Ledger</h2>
+              <dl class="resource-list">
+                <div><dt>Terror</dt><dd id="meter-terror">28.0</dd></div>
+                <div><dt>Corruption</dt><dd id="meter-corruption">20.0</dd></div>
+                <div><dt>Chaos</dt><dd id="meter-chaos">14.0</dd></div>
+              </dl>
+            </div>
+
+            <div class="panel-block">
+              <h2>City</h2>
+              <dl class="city-list">
+                <div><dt>Condition</dt><dd id="meter-condition">Stable</dd></div>
+                <div><dt>Morale</dt><dd id="meter-morale">82.0</dd></div>
+                <div><dt>Response</dt><dd id="meter-response">Unseen Disturbance</dd></div>
+              </dl>
+            </div>
+
+            <div class="panel-block">
+              <h2>Subsystems</h2>
+              <div id="subsystem-bars" class="subsystem-bars"></div>
+            </div>
+          </aside>
+
+          <section class="terminal-panel">
+            <div id="terminal-output" class="terminal-output" role="log" aria-live="polite"></div>
+            <form id="terminal-form" class="terminal-form" autocomplete="off">
+              <span class="prompt">admin@ruin:~$</span>
+              <input
+                id="terminal-input"
+                name="command"
+                type="text"
+                spellcheck="false"
+                aria-label="terminal command"
+              />
+              <button class="terminal-submit" type="submit" aria-label="execute command">↵</button>
+            </form>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <input id="import-file" type="file" accept="application/json" hidden />
+    <script src="assets/app.js"></script>
+  </body>
+</html>
