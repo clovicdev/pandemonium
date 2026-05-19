@@ -125,7 +125,3 @@ You can also launch directly from a save:
 ```bash
 pandemonium --load saves/night-one.json
 ```
-
-## Repository Status 📦
-
-This project is ready to initialize as a Git repository, commit, and push. A zip archive is included in `dist/` for quick upload or handoff.
