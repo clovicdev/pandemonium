@@ -64,8 +64,11 @@ class City:
         self.resources.credit(pulse)
         events.append(
             GameEvent(
-                title="The city's fear ferments",
-                detail=f"{self.condition.label} conditions feed the infernal economy.",
+                title="Fear still pays",
+                detail=(
+                    f"You get {pulse.terror:.1f} Terror, {pulse.corruption:.1f} Corruption, "
+                    f"and {pulse.chaos:.1f} Chaos."
+                ),
                 severity=0.0,
                 visibility=0.0,
                 resource_delta=pulse.rounded(),
@@ -89,7 +92,7 @@ class City:
             condition = self.condition
             events.append(
                 GameEvent(
-                    title=f"City condition: {condition.label}",
+                    title=f"City status: {condition.label}",
                     detail=condition.description,
                     severity=2.0,
                     visibility=1.2,
@@ -125,11 +128,8 @@ class City:
                 self.resources.credit(delta)
                 cascades.append(
                     GameEvent(
-                        title=f"{source.key.label} cascade hits {target.key.label}",
-                        detail=(
-                            f"Stress transfers through civic dependencies, cutting "
-                            f"{target.key.label} integrity by {actual:.1f}."
-                        ),
+                    title=f"{source.key.label} breaks {target.key.label}",
+                    detail=f"{source.key.label} breaks {target.key.label}. Health down by {actual:.1f}.",
                         severity=actual / 3.2,
                         visibility=actual / 2.7,
                         resource_delta=delta.rounded(),
@@ -156,8 +156,8 @@ class City:
                 continue
             events.append(
                 GameEvent(
-                    title=f"Human response stabilizes {system.key.label}",
-                    detail=f"Emergency work restores {repaired:.1f} integrity.",
+                    title=f"Crews patch {system.key.label}",
+                    detail=f"Fixed {repaired:.1f} health.",
                     severity=0.0,
                     visibility=0.25,
                     subsystem=system.key.value,
@@ -180,8 +180,11 @@ class City:
         if before == after:
             return None
         return GameEvent(
-            title="Counter-ritual pressure",
-            detail="Escalated responders suppress ambient dread and disrupt infernal momentum.",
+            title="Police push back",
+            detail=(
+                f"Police took {abs(drain.terror):.1f} Terror, {abs(drain.corruption):.1f} "
+                f"Corruption, and {abs(drain.chaos):.1f} Chaos."
+            ),
             severity=0.0,
             visibility=0.0,
             resource_delta=drain.rounded(),
@@ -272,5 +275,5 @@ class City:
 
 def _mapping(value: object) -> Mapping[str, object]:
     if not isinstance(value, Mapping):
-        raise ValueError("Expected object mapping in save file.")
+        raise ValueError("Expected a saved game object.")
     return value

@@ -20,11 +20,11 @@ class ThreatStage(str, Enum):
     @property
     def label(self) -> str:
         return {
-            ThreatStage.UNSEEN: "Unseen Disturbance",
-            ThreatStage.LOCAL_ALARM: "Local Alarm",
-            ThreatStage.COORDINATED_RESPONSE: "Coordinated Response",
-            ThreatStage.EMERGENCY_POWERS: "Emergency Powers",
-            ThreatStage.OCCULT_TASK_FORCE: "Occult Task Force",
+            ThreatStage.UNSEEN: "No alert",
+            ThreatStage.LOCAL_ALARM: "Local alert",
+            ThreatStage.COORDINATED_RESPONSE: "Citywide alert",
+            ThreatStage.EMERGENCY_POWERS: "Emergency rule",
+            ThreatStage.OCCULT_TASK_FORCE: "Demon task force",
         }[self]
 
 
@@ -135,21 +135,15 @@ def stage_for_score(score: float) -> ThreatStage:
 
 def _escalation_copy(previous: ThreatStage, current: ThreatStage) -> str:
     return {
-        ThreatStage.LOCAL_ALARM: (
-            f"{previous.label} becomes {current.label}: police commands, municipal responders, "
-            "and local incident teams begin comparing notes."
-        ),
+        ThreatStage.LOCAL_ALARM: f"{current.label}: Police and repair crews are looking around.",
         ThreatStage.COORDINATED_RESPONSE: (
-            f"{previous.label} becomes {current.label}: federal analysts and private security "
-            "contractors coordinate countermeasures."
+            f"{current.label}: Police and state teams are working together."
         ),
         ThreatStage.EMERGENCY_POWERS: (
-            f"{previous.label} becomes {current.label}: emergency authorities harden public "
-            "systems and restrict compromised channels."
+            f"{current.label}: The city locks down key systems. Your job gets harder."
         ),
         ThreatStage.OCCULT_TASK_FORCE: (
-            f"{previous.label} becomes {current.label}: specialized investigators stop treating "
-            "the pattern as merely human."
+            f"{current.label}: A team knows this is not human. That's bad."
         ),
-        ThreatStage.UNSEEN: f"{previous.label} recedes into {current.label}.",
+        ThreatStage.UNSEEN: f"{current.label}: The city lost your trail.",
     }[current]

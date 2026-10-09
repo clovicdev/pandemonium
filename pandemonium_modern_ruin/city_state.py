@@ -35,8 +35,8 @@ class StableCity(CityCondition):
     def __init__(self) -> None:
         super().__init__(
             key="stable",
-            label="Stable",
-            description="The city still believes tomorrow will resemble today.",
+            label="Holding",
+            description="Things seem normal. Mostly.",
         )
 
     @property
@@ -51,8 +51,8 @@ class StrainedCity(CityCondition):
     def __init__(self) -> None:
         super().__init__(
             key="strained",
-            label="Strained",
-            description="Failures rhyme often enough that citizens start seeing patterns.",
+            label="Rough",
+            description="Little things keep going wrong.",
         )
 
     @property
@@ -69,7 +69,7 @@ class CrisisCity(CityCondition):
         super().__init__(
             key="crisis",
             label="Crisis",
-            description="The official story cannot keep pace with lived reality.",
+            description="The city is in trouble. Everyone knows it.",
         )
 
     @property
@@ -86,7 +86,7 @@ class RuinedCity(CityCondition):
         super().__init__(
             key="ruined",
             label="Ruined",
-            description="Continuity has become a rumor maintained by exhausted officials.",
+            description="Most of the city has stopped working.",
         )
 
     @property

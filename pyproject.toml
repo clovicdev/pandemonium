@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pandemonium-modern-ruin"
 version = "1.0.0"
-description = "A deterministic CLI sandbox simulation about systemic collapse, demonic infiltration, and escalating human response."
+description = "A terminal game about breaking a city and staying ahead of the police."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Pandemonium Modern Ruin contributors" }]
-keywords = ["game", "cli", "simulation", "sandbox", "emergent-ai"]
+keywords = ["game", "cli", "simulation", "sandbox"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Environment :: Console",

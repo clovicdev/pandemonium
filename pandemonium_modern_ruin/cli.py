@@ -12,8 +12,8 @@ from pandemonium_modern_ruin.views import TextRenderer
 
 
 class PandemoniumShell(cmd.Cmd):
-    intro = "Pandemonium: Modern Ruin. Type 'help' for commands."
-    prompt = "pandemonium> "
+    intro = "Pandemonium. Type 'help' to see what you can do."
+    prompt = "user@ruin:~$ "
 
     def __init__(self, controller: GameController, renderer: TextRenderer | None = None) -> None:
         super().__init__()
@@ -32,7 +32,7 @@ class PandemoniumShell(cmd.Cmd):
     def do_cast(self, arg: str) -> bool | None:
         parts = shlex.split(arg)
         if not parts:
-            print("Usage: cast <ability> [target]")
+            print("Try: cast <move> [person]")
             return None
         ability = parts[0]
         target = parts[1] if len(parts) > 1 else None
@@ -41,14 +41,14 @@ class PandemoniumShell(cmd.Cmd):
     def do_possess(self, arg: str) -> bool | None:
         target = arg.strip()
         if not target:
-            print("Usage: possess <npc-key>")
+            print("Try: possess <person-key>")
             return None
         return self._resolve_turn(lambda: self.controller.cast("possess", target))
 
     def do_exploit(self, arg: str) -> bool | None:
         target = arg.strip()
         if not target:
-            print("Usage: exploit <npc-key>")
+            print("Try: exploit <person-key>")
             return None
         return self._resolve_turn(lambda: self.controller.cast("exploit", target))
 
@@ -62,19 +62,19 @@ class PandemoniumShell(cmd.Cmd):
         except PandemoniumError as exc:
             print(exc)
             return
-        print(f"Saved to {path}")
+        print(f"Saved: {path}")
 
     def do_load(self, arg: str) -> None:
         source = arg.strip()
         if not source:
-            print("Usage: load <path>")
+            print("Try: load <path>")
             return
         try:
             self.controller.load_into_self(source)
         except PandemoniumError as exc:
             print(exc)
             return
-        print(f"Loaded {Path(source).expanduser().resolve()}")
+        print(f"Loaded: {Path(source).expanduser().resolve()}")
         print(self.renderer.status(self.controller.simulation))
 
     def do_help(self, arg: str) -> None:
@@ -94,7 +94,7 @@ class PandemoniumShell(cmd.Cmd):
         return None
 
     def default(self, line: str) -> None:
-        print(f"Unknown command: {line}. Type 'help' for options.")
+        print(f"Don't know '{line}'. Type 'help' for commands.")
 
     def _resolve_turn(self, action) -> bool | None:
         try:
@@ -107,11 +107,11 @@ class PandemoniumShell(cmd.Cmd):
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="pandemonium", description="Play Pandemonium: Modern Ruin.")
-    parser.add_argument("--seed", type=int, default=None, help="Deterministic seed for a new game.")
+    parser = argparse.ArgumentParser(prog="pandemonium", description="Play Pandemonium.")
+    parser.add_argument("--seed", type=int, default=None, help="Use this number for a new run.")
     parser.add_argument("--city", default="New Carthage", help="City name for a new game.")
-    parser.add_argument("--load", dest="load_path", default=None, help="Load a JSON save file.")
-    parser.add_argument("--demo", action="store_true", help="Run a short deterministic demonstration.")
+    parser.add_argument("--load", dest="load_path", default=None, help="Load a saved game.")
+    parser.add_argument("--demo", action="store_true", help="Play a short example.")
     args = parser.parse_args(argv)
 
     try:

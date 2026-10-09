@@ -56,7 +56,7 @@ class Simulation:
         before_escalations = len(self.city.escalations)
         tick_events = self.city.tick(self.threat.score, self.rng)
         self._publish(tick_events)
-        report = ActionReport("You let the city listen to itself for one more turn.", tick_events)
+        report = ActionReport("You wait. The city finds a new way to fail.", tick_events)
         return self._outcome(report, tick_events, before_escalations)
 
     def summary(self) -> dict[str, object]:
@@ -85,7 +85,7 @@ class Simulation:
         city_payload = payload.get("city")
         threat_payload = payload.get("threat")
         if not isinstance(city_payload, Mapping) or not isinstance(threat_payload, Mapping):
-            raise ValueError("Save file is missing city or threat data.")
+            raise ValueError("Save is missing city or police data.")
         rng = Random()
         rng_state = payload.get("rng_state")
         if rng_state is not None:

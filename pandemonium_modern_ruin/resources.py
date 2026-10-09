@@ -68,7 +68,7 @@ class ResourceLedger:
         if not self.can_pay(cost):
             current = self.as_compact_text()
             needed = _format_delta(cost)
-            raise InsufficientResources(f"{reason} requires {needed}; available {current}.")
+            raise InsufficientResources(f"Need {needed}. You have {current}.")
         self.credit(-cost)
 
     def credit(self, delta: ResourceDelta) -> None:

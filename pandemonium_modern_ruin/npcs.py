@@ -20,11 +20,11 @@ class NPCRole(str, Enum):
     @property
     def label(self) -> str:
         return {
-            NPCRole.TECH_CEO: "Tech CEO",
-            NPCRole.PLANT_OPERATOR: "Plant Operator",
-            NPCRole.POLITICAL_INFLUENCER: "Political Influencer",
-            NPCRole.HOSPITAL_ADMIN: "Hospital Administrator",
-            NPCRole.CENTRAL_BANKER: "Central Bank Director",
+            NPCRole.TECH_CEO: "Tech boss",
+            NPCRole.PLANT_OPERATOR: "Power plant worker",
+            NPCRole.POLITICAL_INFLUENCER: "Public figure",
+            NPCRole.HOSPITAL_ADMIN: "Hospital lead",
+            NPCRole.CENTRAL_BANKER: "Banker",
         }[self]
 
 

@@ -3,18 +3,18 @@
 
   const systemOrder = ["power_grid", "financial_markets", "digital_communications", "public_health", "government_response"];
   const systemLabels = {
-    power_grid: "Power Grid",
-    financial_markets: "Financial Markets",
-    digital_communications: "Digital Communications",
-    public_health: "Public Health",
-    government_response: "Government Response"
+    power_grid: "Power",
+    financial_markets: "Markets",
+    digital_communications: "Phones & Internet",
+    public_health: "Hospitals",
+    government_response: "City Offices"
   };
   const stageLabels = {
-    unseen: "Unseen Disturbance",
-    local_alarm: "Local Alarm",
-    coordinated_response: "Coordinated Response",
-    emergency_powers: "Emergency Powers",
-    occult_task_force: "Occult Task Force"
+    unseen: "No alert",
+    local_alarm: "Local alert",
+    coordinated_response: "Citywide alert",
+    emergency_powers: "Emergency rule",
+    occult_task_force: "Demon task force"
   };
   const stagePolicy = {
     unseen: { repair: 2.0, detection: 1.5, possessionResistance: 2.0, containment: 0.0 },
@@ -24,11 +24,11 @@
     occult_task_force: { repair: 8.5, detection: 23.0, possessionResistance: 42.0, containment: 7.4 }
   };
   const roles = {
-    tech_ceo: "Tech CEO",
-    plant_operator: "Plant Operator",
-    political_influencer: "Political Influencer",
-    hospital_admin: "Hospital Administrator",
-    central_banker: "Central Bank Director"
+    tech_ceo: "Tech boss",
+    plant_operator: "Power plant worker",
+    political_influencer: "Public figure",
+    hospital_admin: "Hospital lead",
+    central_banker: "Banker"
   };
 
   class Generator {
@@ -137,7 +137,7 @@
       const normalized = normalize(key);
       const command = abilities[normalized];
       if (!command) {
-        throw new Error(`Unknown ability: ${key}`);
+        throw new Error(`Don't know that move: ${key}`);
       }
       const beforeEscalations = this.escalations.length;
       const report = command.run(this, target);
@@ -153,7 +153,7 @@
       const beforeEscalations = this.escalations.length;
       const events = this.tick();
       this.publish(events);
-      return this.outcome("You let the city listen to itself for one more turn.", events, beforeEscalations, true);
+      return this.outcome("You wait. The city finds a new way to fail.", events, beforeEscalations, true);
     }
 
     tick() {
@@ -163,7 +163,7 @@
       this.condition = assessCondition(this);
       const pulse = resourcePulse(this.condition, this);
       credit(this.resources, pulse);
-      events.push(event("The city's fear ferments", `${conditionLabel(this.condition)} conditions feed the infernal economy.`, 0, 0, pulse, null, 0, ["economy"]));
+      events.push(event("Fear still pays", `You get Terror ${pulse.terror.toFixed(1)}, Corruption ${pulse.corruption.toFixed(1)}, and Chaos ${pulse.chaos.toFixed(1)}.`, 0, 0, pulse, null, 0, ["economy"]));
       events.push(...this.cascadeFailures());
       events.push(...this.humanResponse());
       const containment = this.containmentDrain();
@@ -175,7 +175,7 @@
       Object.values(this.npcs).forEach((npc) => tickNpc(npc, detectionPressure));
       this.condition = assessCondition(this);
       if (this.condition !== previousCondition) {
-        events.push(event(`City condition: ${conditionLabel(this.condition)}`, conditionDetail(this.condition), 2, 1.2, zeroDelta(), null, 0.4, ["city_state"]));
+        events.push(event(`City status: ${conditionLabel(this.condition)}`, conditionDetail(this.condition), 2, 1.2, zeroDelta(), null, 0.4, ["city_state"]));
       }
       this.trim();
       return events;
@@ -204,7 +204,7 @@
           }
           const delta = { terror: actual * 0.18, corruption: actual * 0.06, chaos: actual * 0.08 };
           credit(this.resources, delta);
-          events.push(event(`${systemLabels[sourceKey]} cascade hits ${systemLabels[targetKey]}`, `Stress transfers through civic dependencies, cutting ${systemLabels[targetKey]} integrity by ${actual.toFixed(1)}.`, actual / 3.2, actual / 2.7, delta, targetKey, actual / 8.5, ["cascade"]));
+          events.push(event(`${systemLabels[sourceKey]} breaks ${systemLabels[targetKey]}`, `${systemLabels[sourceKey]} breaks ${systemLabels[targetKey]}. Health down by ${actual.toFixed(1)}.`, actual / 3.2, actual / 2.7, delta, targetKey, actual / 8.5, ["cascade"]));
         });
       });
       return events;
@@ -228,7 +228,7 @@
           if (restored < 0.45) {
             return;
           }
-          events.push(event(`Human response stabilizes ${systemLabels[key]}`, `Emergency work restores ${restored.toFixed(1)} integrity.`, 0, 0.25, zeroDelta(), key, 0, ["response"]));
+          events.push(event(`Crews patch ${systemLabels[key]}`, `Fixed ${restored.toFixed(1)} health.`, 0, 0.25, zeroDelta(), key, 0, ["response"]));
         });
       return events;
     }
@@ -247,7 +247,7 @@
       if (before === JSON.stringify(this.resources)) {
         return null;
       }
-      return event("Counter-ritual pressure", "Escalated responders suppress ambient dread and disrupt infernal momentum.", 0, 0, drain, null, 0, ["response", "containment"]);
+      return event("Police push back", `Police took ${(-drain.terror).toFixed(1)} Terror, ${(-drain.corruption).toFixed(1)} Corruption, and ${(-drain.chaos).toFixed(1)} Chaos.`, 0, 0, drain, null, 0, ["response", "containment"]);
     }
 
     moveMorale() {
@@ -299,10 +299,10 @@
 
   const abilities = {
     blackout: {
-      name: "Blackout Cascade",
+      name: "Blackout",
       cost: { corruption: 2, chaos: 5 },
       target: "-",
-      summary: "Overloads civic dependence on power and lets secondary failures bloom.",
+      summary: "Cut the power. Other systems may fail too.",
       run(sim) {
         pay(sim, this.cost, this.name);
         const amount = sim.rng.uniform(16, 27) * resistance(sim, "power_grid");
@@ -311,8 +311,8 @@
         const delta = { terror: 6 + actual * 0.36, corruption: 1.1, chaos: 2.2 + comms * 0.08 };
         credit(sim.resources, delta);
         return {
-          message: "A district-wide dependency chain snaps under impossible timing.",
-          events: [event("Blackout cascade", `Power Grid integrity falls by ${actual.toFixed(1)}; communications lose ${comms.toFixed(1)}.`, 6 + actual / 3.4, 6.5 + actual / 4, delta, "power_grid", 4.5, ["ability", "power"])]
+          message: "The lights go out. Your slideshow can wait.",
+          events: [event("Blackout", `Power health falls by ${actual.toFixed(1)}. Phone and internet health drops by ${comms.toFixed(1)}.`, 6 + actual / 3.4, 6.5 + actual / 4, delta, "power_grid", 4.5, ["ability", "power"])]
         };
       }
     },
@@ -320,7 +320,7 @@
       name: "Market Panic",
       cost: { corruption: 5, chaos: 2 },
       target: "-",
-      summary: "Turns confidence into contagion across financial and government systems.",
+      summary: "Rattle the markets and the city office at once.",
       run(sim) {
         pay(sim, this.cost, this.name);
         const amount = sim.rng.uniform(14, 24) * resistance(sim, "financial_markets");
@@ -329,8 +329,8 @@
         const delta = { terror: 3.5 + actual * 0.22, corruption: 3 + actual * 0.14, chaos: 1.4 };
         credit(sim.resources, delta);
         return {
-          message: "Screens glow red, anchors stumble, and institutions begin correcting each other.",
-          events: [event("Market panic", `Financial Markets integrity falls by ${actual.toFixed(1)}; Government Response loses ${gov.toFixed(1)}.`, 5 + actual / 3.8, 7 + actual / 5, delta, "financial_markets", 3.6, ["ability", "finance"])]
+          message: "The market panics. The anchors pretend it's fine.",
+          events: [event("Market panic", `Market health falls by ${actual.toFixed(1)}. City offices lose ${gov.toFixed(1)} health.`, 5 + actual / 3.8, 7 + actual / 5, delta, "financial_markets", 3.6, ["ability", "finance"])]
         };
       }
     },
@@ -338,7 +338,7 @@
       name: "Signal Haunting",
       cost: { terror: 2, chaos: 4 },
       target: "-",
-      summary: "Poisons the public channel with impossible coincidences and recursive dread.",
+      summary: "Make the city's phones and networks act haunted.",
       run(sim) {
         pay(sim, this.cost, this.name);
         const actual = damage(sim.systems.digital_communications, sim.rng.uniform(13, 23) * resistance(sim, "digital_communications"), 0.48);
@@ -347,16 +347,16 @@
         const delta = { terror: 4.2 + actual * 0.31, corruption: 2.7 + compromised * 0.2, chaos: 1.6 };
         credit(sim.resources, delta);
         return {
-          message: "The network remains online, which makes the haunting worse.",
-          events: [event("Signal haunting", `Digital Communications integrity falls by ${actual.toFixed(1)}; security slips by ${compromised.toFixed(1)}.`, 4.8 + actual / 4, 8 + actual / 4.2, delta, "digital_communications", 4.2, ["ability", "communications"])]
+          message: "The network works. It just sends weird stuff now.",
+          events: [event("Signal haunting", `Phone and internet health falls by ${actual.toFixed(1)}. Security drops by ${compromised.toFixed(1)}.`, 4.8 + actual / 4, 8 + actual / 4.2, delta, "digital_communications", 4.2, ["ability", "communications"])]
         };
       }
     },
     miasma: {
-      name: "Miasma of Rumors",
+      name: "Rumor Wave",
       cost: { terror: 4, corruption: 3 },
       target: "-",
-      summary: "Transforms ordinary symptoms and civic uncertainty into public-health dread.",
+      summary: "Spread a rumor about a new outbreak.",
       run(sim) {
         pay(sim, this.cost, this.name);
         const health = damage(sim.systems.public_health, sim.rng.uniform(12, 22) * resistance(sim, "public_health"), 0.46);
@@ -365,16 +365,16 @@
         const delta = { terror: 5.2 + health * 0.34, corruption: 2.1, chaos: 1.1 + gov * 0.08 };
         credit(sim.resources, delta);
         return {
-          message: "Queues lengthen, denials multiply, and rumor becomes its own weather.",
-          events: [event("Miasma of rumors", `Public Health integrity falls by ${health.toFixed(1)}; governance loses ${gov.toFixed(1)}.`, 5.2 + health / 3.6, 6.2 + health / 4.5, delta, "public_health", 3.9, ["ability", "health"])]
+          message: "People rush the hospital. Nobody trusts the all-clear.",
+          events: [event("Rumors spread", `Hospital health falls by ${health.toFixed(1)}. City offices lose ${gov.toFixed(1)} health.`, 5.2 + health / 3.6, 6.2 + health / 4.5, delta, "public_health", 3.9, ["ability", "health"])]
         };
       }
     },
     paralysis: {
-      name: "Bureaucratic Paralysis",
+      name: "Office Gridlock",
       cost: { corruption: 7, chaos: 2 },
       target: "-",
-      summary: "Binds agencies in contradiction, slowing repairs and raising institutional distrust.",
+      summary: "Keep city offices arguing instead of fixing things.",
       run(sim) {
         pay(sim, this.cost, this.name);
         const damageTaken = damage(sim.systems.government_response, sim.rng.uniform(15, 25) * resistance(sim, "government_response"), 0.56);
@@ -382,16 +382,16 @@
         const delta = { terror: 2.6 + damageTaken * 0.18, corruption: 4.2 + compromised * 0.25, chaos: 1.8 };
         credit(sim.resources, delta);
         return {
-          message: "Every urgent memo contradicts the one before it.",
-          events: [event("Bureaucratic paralysis", `Government Response integrity falls by ${damageTaken.toFixed(1)}; security loses ${compromised.toFixed(1)}.`, 5 + damageTaken / 3.9, 5 + damageTaken / 5.1, delta, "government_response", 3.1, ["ability", "government"])]
+          message: "Every office has a plan. None of them match.",
+          events: [event("Office gridlock", `City office health falls by ${damageTaken.toFixed(1)}. Security drops by ${compromised.toFixed(1)}.`, 5 + damageTaken / 3.9, 5 + damageTaken / 5.1, delta, "government_response", 3.1, ["ability", "government"])]
         };
       }
     },
     surge: {
-      name: "Infernal Surge",
+      name: "Chaos Surge",
       cost: { terror: 8, corruption: 5 },
       target: "-",
-      summary: "Converts accumulated fear and influence into raw Chaos Energy.",
+      summary: "Trade fear and corruption for Chaos.",
       run(sim) {
         pay(sim, this.cost, this.name);
         const instability = Math.max(0, 100 - sim.averageIntegrity()) / 100;
@@ -399,20 +399,20 @@
         const delta = { terror: 0, corruption: 0, chaos: chaosGain };
         credit(sim.resources, delta);
         return {
-          message: "The ruin already sown is rendered into a hotter currency.",
-          events: [event("Infernal surge", `Chaos Energy rises by ${chaosGain.toFixed(1)}.`, 1.8 + chaosGain / 8, 1, delta, null, 1, ["ability", "economy"])]
+          message: "One bad day. Plenty of Chaos.",
+          events: [event("Chaos surge", `Chaos rises by ${chaosGain.toFixed(1)}.`, 1.8 + chaosGain / 8, 1, delta, null, 1, ["ability", "economy"])]
         };
       }
     },
     possess: {
-      name: "Possess Key Human",
+      name: "Take Over",
       cost: { corruption: 6, chaos: 3 },
       target: "npc-key",
-      summary: "Attempts to seize a high-influence NPC for later systemic sabotage.",
+      summary: "Try to take over a person with power.",
       run(sim, target) {
         const npc = targetNpc(sim, target);
         if (npc.possessed) {
-          throw new Error(`${npc.name} is already possessed.`);
+          throw new Error(`${npc.name} is already under your control.`);
         }
         pay(sim, this.cost, this.name);
         const chance = possessionChance(npc, sim.resources.corruption, sim.resources.chaos, sim.policy.possessionResistance);
@@ -424,30 +424,30 @@
           const delta = { terror: 0, corruption: 1.5, chaos: 0.8 };
           credit(sim.resources, delta);
           return {
-            message: `${npc.name} opens the door from the inside.`,
-            events: [event(`Possession: ${npc.name}`, `${roles[npc.role]} compromised (${Math.round(chance * 100)}% chance, rolled ${Math.round(roll * 100)}%).`, 4.5, 1.8 + npc.suspicion / 28, delta, null, 2.8, ["ability", "possession"])]
+          message: `${npc.name} is yours now. Their 3 p.m. meeting is still on.`,
+            events: [event(`${npc.name} is under your control`, `${roles[npc.role]} taken over. Chance: ${Math.round(chance * 100)}%.`, 4.5, 1.8 + npc.suspicion / 28, delta, null, 2.8, ["ability", "possession"])]
           };
         }
         npc.suspicion = Math.min(100, npc.suspicion + 18);
         return {
-          message: `${npc.name} resists and starts noticing the shape of the attempt.`,
+          message: `${npc.name} says no. They know something's wrong.`,
           success: false,
-          events: [event(`Failed possession: ${npc.name}`, `The attempt fails (${Math.round(chance * 100)}% chance, rolled ${Math.round(roll * 100)}%).`, 2.8, 2 + npc.suspicion / 26, zeroDelta(), null, 3.2, ["ability", "possession", "failed"])]
+          events: [event(`${npc.name} caught on`, `Chance was ${Math.round(chance * 100)}%. The try failed.`, 2.8, 2 + npc.suspicion / 26, zeroDelta(), null, 3.2, ["ability", "possession", "failed"])]
         };
       }
     },
     exploit: {
-      name: "Exploit Possession",
+      name: "Pull Strings",
       cost: { chaos: 2 },
       target: "npc-key",
-      summary: "Uses a possessed NPC's authority to trigger cross-system failure from within.",
+      summary: "Use someone you took over to damage city systems.",
       run(sim, target) {
         const npc = targetNpc(sim, target);
         if (!npc.possessed) {
-          throw new Error(`${npc.name} is not possessed.`);
+          throw new Error(`You haven't taken over ${npc.name} yet.`);
         }
         if (npc.cooldown > 0) {
-          throw new Error(`${npc.name} needs ${npc.cooldown} more turn(s) before another exploit.`);
+          throw new Error(`Wait ${npc.cooldown} more turn(s) before using ${npc.name} again.`);
         }
         pay(sim, this.cost, this.name);
         const events = [];
@@ -456,7 +456,7 @@
           const base = sim.rng.uniform(8.5, 15.5) * influence;
           const actual = damage(sim.systems[key], base * resistance(sim, key), 0.42);
           totalDamage += actual;
-          events.push(event(`${roles[npc.role]} exploit hits ${systemLabels[key]}`, `${npc.name}'s authority cuts integrity by ${actual.toFixed(1)}.`, 4.2 + actual / 4, 3 + actual / 5.5 + npc.suspicion / 45, zeroDelta(), key, 2.2 + actual / 9.5, ["ability", "infiltration"]));
+          events.push(event(`${systemLabels[key]} takes a hit`, `${npc.name} cuts its health by ${actual.toFixed(1)}.`, 4.2 + actual / 4, 3 + actual / 5.5 + npc.suspicion / 45, zeroDelta(), key, 2.2 + actual / 9.5, ["ability", "infiltration"]));
         });
         npc.suspicion = Math.min(100, npc.suspicion + 21);
         npc.cooldown = 2;
@@ -466,7 +466,7 @@
         const flavor = exploitFlavor(npc.role);
         events.push(event(flavor[0], flavor[1], 3.4, 4, delta, null, 1.4, ["ability", "infiltration", npc.role]));
         return {
-          message: `${npc.name} weaponizes legitimacy without ever raising their voice.`,
+          message: `${npc.name} uses the job to mess with city systems.`,
           events
         };
       }
@@ -540,7 +540,7 @@
     const corruption = cost.corruption || 0;
     const chaos = cost.chaos || 0;
     if (sim.resources.terror + 1e-9 < terror || sim.resources.corruption + 1e-9 < corruption || sim.resources.chaos + 1e-9 < chaos) {
-      throw new Error(`${reason} requires ${costText(cost)}; available ${resourceText(sim.resources)}.`);
+      throw new Error(`Need ${costText(cost)}. You have ${resourceText(sim.resources)}.`);
     }
     credit(sim.resources, { terror: -terror, corruption: -corruption, chaos: -chaos });
   }
@@ -623,8 +623,8 @@
 
   function conditionLabel(key) {
     return {
-      stable: "Stable",
-      strained: "Strained",
+      stable: "Holding",
+      strained: "Rough",
       crisis: "Crisis",
       ruined: "Ruined"
     }[key];
@@ -632,10 +632,10 @@
 
   function conditionDetail(key) {
     return {
-      stable: "The city still believes tomorrow will resemble today.",
-      strained: "Failures rhyme often enough that citizens start seeing patterns.",
-      crisis: "The official story cannot keep pace with lived reality.",
-      ruined: "Continuity has become a rumor maintained by exhausted officials."
+      stable: "Things seem normal. Mostly.",
+      strained: "Little things keep going wrong.",
+      crisis: "The city is in trouble. Everyone knows it.",
+      ruined: "Most of the city has stopped working."
     }[key];
   }
 
@@ -681,111 +681,112 @@
 
   function escalationCopy(previous, current) {
     const copy = {
-      local_alarm: `${stageLabels[previous]} becomes ${stageLabels[current]}: police commands, municipal responders, and local incident teams begin comparing notes.`,
-      coordinated_response: `${stageLabels[previous]} becomes ${stageLabels[current]}: federal analysts and private security contractors coordinate countermeasures.`,
-      emergency_powers: `${stageLabels[previous]} becomes ${stageLabels[current]}: emergency authorities harden public systems and restrict compromised channels.`,
-      occult_task_force: `${stageLabels[previous]} becomes ${stageLabels[current]}: specialized investigators stop treating the pattern as merely human.`,
-      unseen: `${stageLabels[previous]} recedes into ${stageLabels[current]}.`
+      local_alarm: `${stageLabels[current]}: Police and repair crews are looking around.`,
+      coordinated_response: `${stageLabels[current]}: Police and state teams are working together.`,
+      emergency_powers: `${stageLabels[current]}: The city locks down key systems. Your job gets harder.`,
+      occult_task_force: `${stageLabels[current]}: A team knows this is not human. That's bad.`,
+      unseen: `${stageLabels[current]}: The city lost your trail.`
     };
     return copy[current];
   }
 
   function targetNpc(sim, target) {
     if (!target) {
-      throw new Error("This ability requires an NPC key.");
+      throw new Error("Add a person's key. Try `npcs` to see the list.");
     }
     const key = normalize(target);
     const npc = sim.npcs[key];
     if (!npc) {
-      throw new Error(`Unknown NPC '${target}'. Available targets: ${Object.keys(sim.npcs).join(", ")}.`);
+      throw new Error(`Can't find '${target}'. Try \`npcs\` to see the keys.`);
     }
     return npc;
   }
 
   function exploitFlavor(role) {
     return {
-      tech_ceo: ["Platform consensus fracture", "A trusted executive message shifts millions of private assumptions at once."],
-      plant_operator: ["Operations handoff spiral", "Routine authority turns minor maintenance ambiguity into cascading institutional delay."],
-      political_influencer: ["Civic legitimacy shock", "Followers receive certainty; everyone else receives consequences."],
-      hospital_admin: ["Triage rumor storm", "Scarce capacity and contradictory reassurance amplify each other."],
-      central_banker: ["Liquidity omen", "A careful statement is heard as prophecy, accusation, and retreat."]
+      tech_ceo: ["Leaked CEO message", "One memo rattles the market."],
+      plant_operator: ["Repair delay", "One switch gets flipped. The repair crew is stuck."],
+      political_influencer: ["Rumor spreads", "One post turns a rumor into a fight."],
+      hospital_admin: ["Hospital panic", "One bad update sends the hospital into a panic."],
+      central_banker: ["Bank warning", "One careful statement starts a loud week."]
     }[role];
   }
 
   function statusText(sim) {
     const lines = [
-      `${sim.cityName} | Turn ${sim.turn} | Seed ${sim.seed}`,
-      `Condition: ${conditionLabel(sim.condition)} | Threat: ${stageLabels[sim.stage]} (${sim.threat.toFixed(1)})`,
-      `Ruin: ${sim.ruinScore().toFixed(1)}/100 | Morale: ${sim.morale.toFixed(1)}/100`,
-      `Resources: ${resourceText(sim.resources)}`,
+      `${sim.cityName} | Turn ${sim.turn} | Run ${sim.seed}`,
+      `City: ${conditionLabel(sim.condition)} | Police: ${stageLabels[sim.stage]} (${sim.threat.toFixed(1)})`,
+      `Ruin: ${sim.ruinScore().toFixed(1)}/100 | Mood: ${sim.morale.toFixed(1)}/100`,
+      `You have: ${resourceText(sim.resources)}`,
       "",
-      table(["Subsystem", "Integrity", "Trust", "Security", "Status"], systemOrder.map((key) => {
+      table(["System", "Health", "Trust", "Security", "State"], systemOrder.map((key) => {
         const system = sim.systems[key];
         return [systemLabels[key], system.integrity.toFixed(1), system.publicTrust.toFixed(1), system.security.toFixed(1), statusBand(system)];
       }))
     ];
     const possessed = Object.values(sim.npcs).filter((npc) => npc.possessed);
     if (possessed.length) {
-      lines.push("", `Possessed assets: ${possessed.map((npc) => `${npc.name} (${npc.key}, suspicion ${npc.suspicion.toFixed(0)})`).join(", ")}`);
+      lines.push("", `People under your control: ${possessed.map((npc) => `${npc.name} (${npc.key}, suspicion ${npc.suspicion.toFixed(0)})`).join(", ")}`);
     }
     if (sim.escalations.length) {
-      lines.push("", `Latest escalation: ${sim.escalations[sim.escalations.length - 1]}`);
+      lines.push("", `Police: ${sim.escalations[sim.escalations.length - 1]}`);
     }
     return lines.join("\n");
   }
 
   function abilityText() {
-    return table(["Key", "Cost", "Target", "Effect"], Object.entries(abilities).map(([key, ability]) => [key, costText(ability.cost), ability.target, ability.summary]));
+    return table(["Key", "Cost", "Person", "What it does"], Object.entries(abilities).map(([key, ability]) => [key, costText(ability.cost), ability.target === "npc-key" ? "person key" : "-", ability.summary]));
   }
 
   function npcText(sim) {
-    return table(["Key", "Name", "Role", "State", "Susp.", "CD", "Influence"], Object.values(sim.npcs).map((npc) => {
+    return table(["Key", "Name", "Job", "State", "Alert", "Wait", "Systems"], Object.values(sim.npcs).map((npc) => {
       const influence = Object.entries(npc.influence).map(([key, value]) => `${systemLabels[key]} x${formatCompact(value)}`).join(", ");
-      return [npc.key, npc.name, roles[npc.role], npc.possessed ? "possessed" : "free", npc.suspicion.toFixed(0), String(npc.cooldown), influence];
+      return [npc.key, npc.name, roles[npc.role], npc.possessed ? "under control" : "free", npc.suspicion.toFixed(0), String(npc.cooldown), influence];
     }));
   }
 
   function outcomeText(outcome, sim) {
     const lines = [outcome.message];
-    outcome.escalations.forEach((line) => lines.push("", `Escalation: ${line}`));
+    outcome.escalations.forEach((line) => lines.push("", `Police response: ${line}`));
     outcome.events.filter(isNotable).slice(0, 9).forEach((item) => {
       lines.push(`- ${item.title}: ${item.detail}${deltaText(item.delta)}`);
     });
     if (outcome.victory) {
-      lines.push("", "The city is ruined. Pandemonium has achieved modern dominion.");
+      lines.push("", "The city is yours. Most people had a worse night.");
     } else if (outcome.banished) {
-      lines.push("", "Containment overwhelms your remaining Chaos Energy. You are banished.");
+      lines.push("", "They caught you. Your run is over.");
     }
-    lines.push("", `Threat ${sim.threat.toFixed(1)} (${stageLabels[sim.stage]}) | Ruin ${sim.ruinScore().toFixed(1)}/100 | ${resourceText(sim.resources)}`);
+    lines.push("", `Police ${sim.threat.toFixed(1)} (${stageLabels[sim.stage]}) | Ruin ${sim.ruinScore().toFixed(1)}/100 | ${resourceText(sim.resources)}`);
     return lines.join("\n");
   }
 
   function helpText() {
     return [
       "Commands",
-      "status                 show city, resources, threat, and subsystem health",
-      "abilities              list demonic commands and costs",
-      "npcs                   list possession targets and influence vectors",
-      "cast <ability> [target] execute an ability",
-      "possess <npc-key>      shortcut for cast possess <npc-key>",
-      "exploit <npc-key>      shortcut for cast exploit <npc-key>",
-      "wait                   pass one turn",
-      "save                   write the current run to this browser",
-      "load                   restore the browser save",
-      "export                 download a JSON save file",
-      "import                 load a JSON save file",
-      "new [seed]             start another deterministic run",
-      "demo                   run a four-command opening",
-      "clear                  clear the terminal"
+      "status                 show the city",
+      "abilities              list moves and costs",
+      "npcs                   list people and their keys",
+      "cast <move> [person]   use a move",
+      "possess <person>       take over a person",
+      "exploit <person>       use them to break systems",
+      "wait                   pass a turn",
+      "save                   save this run",
+      "load                   load a saved run",
+      "export                 download a save",
+      "import                 load a save file",
+      "new [number]           start a new run",
+      "demo                   play a short example",
+      "clear                  clear the terminal",
+      "about                  learn the rules"
     ].join("\n");
   }
 
   function aboutText() {
     return [
       "Pandemonium: Modern Ruin",
-      "A deterministic terminal sandbox about corrupting a fictional city through resource pressure, possession, cascading infrastructure stress, and escalating human response.",
+      "Take over people. Break city systems. Don't get caught.",
       "",
-      "The browser edition mirrors the Python CLI rules while keeping all state local to the visitor's browser."
+      "Your run stays in this browser."
     ].join("\n");
   }
 
@@ -799,7 +800,7 @@
 
   function statusBand(system) {
     if (system.integrity >= 76) {
-      return "operational";
+      return "working";
     }
     if (system.integrity >= 51) {
       return "strained";
@@ -861,6 +862,19 @@
   let history = [];
   let historyIndex = 0;
 
+  const terminal = document.querySelector(".terminal-window");
+  if (terminal && window.matchMedia("(pointer: fine)").matches) {
+    terminal.addEventListener("pointermove", (eventObject) => {
+      const bounds = terminal.getBoundingClientRect();
+      terminal.style.setProperty("--spotlight-x", `${eventObject.clientX - bounds.left}px`);
+      terminal.style.setProperty("--spotlight-y", `${eventObject.clientY - bounds.top}px`);
+    });
+    terminal.addEventListener("pointerleave", () => {
+      terminal.style.setProperty("--spotlight-x", "72%");
+      terminal.style.setProperty("--spotlight-y", "18%");
+    });
+  }
+
   function write(text, tone = "system") {
     const entry = document.createElement("pre");
     entry.className = `entry ${tone}`;
@@ -874,9 +888,9 @@
   }
 
   function refreshHud() {
-    document.getElementById("signal-threat").textContent = `THREAT ${sim.threat.toFixed(1)}`;
-    document.getElementById("signal-ruin").textContent = `RUIN ${sim.ruinScore().toFixed(1)}`;
-    document.getElementById("signal-turn").textContent = `TURN ${sim.turn}`;
+    document.getElementById("signal-threat").textContent = sim.threat.toFixed(1);
+    document.getElementById("signal-ruin").textContent = sim.ruinScore().toFixed(1);
+    document.getElementById("signal-turn").textContent = sim.turn;
     document.getElementById("meter-terror").textContent = sim.resources.terror.toFixed(1);
     document.getElementById("meter-corruption").textContent = sim.resources.corruption.toFixed(1);
     document.getElementById("meter-chaos").textContent = sim.resources.chaos.toFixed(1);
@@ -910,7 +924,7 @@
     if (!command) {
       return;
     }
-    write(`admin@ruin:~$ ${command}`, "command");
+    write(`user@ruin:~$ ${command}`, "command");
     const parts = command.split(/\s+/);
     const verb = normalize(parts[0]);
     try {
@@ -926,7 +940,7 @@
         write(aboutText());
       } else if (verb === "cast") {
         if (!parts[1]) {
-          throw new Error("Usage: cast <ability> [target]");
+          throw new Error("Try: cast <move> [person]");
         }
         write(outcomeText(sim.perform(parts[1], parts[2]), sim), "event");
       } else if (verb === "possess") {
@@ -937,24 +951,24 @@
         write(outcomeText(sim.wait(), sim), "event");
       } else if (verb === "save") {
         localStorage.setItem(storeKey, JSON.stringify(sim.serialize()));
-        write("Run saved to browser storage.", "success");
+        write("Run saved in this browser.", "success");
       } else if (verb === "load") {
         const saved = localStorage.getItem(storeKey);
         if (!saved) {
-          throw new Error("No browser save exists.");
+          throw new Error("No saved run yet.");
         }
         sim = new Simulation(null, JSON.parse(saved));
-        write("Browser save restored.", "success");
+        write("Saved run loaded.", "success");
         write(statusText(sim));
       } else if (verb === "export") {
         exportSave();
-        write("JSON save exported.", "success");
+        write("Save file downloaded.", "success");
       } else if (verb === "import") {
         importFile.click();
       } else if (verb === "new") {
         const seed = parts[1] ? Number.parseInt(parts[1], 10) : 666;
         if (!Number.isFinite(seed)) {
-          throw new Error("Seed must be a number.");
+          throw new Error("Use a number for the seed.");
         }
         sim = new Simulation(seed);
         clearTerminal();
@@ -964,7 +978,7 @@
       } else if (verb === "clear") {
         clearTerminal();
       } else {
-        throw new Error(`Unknown command: ${parts[0]}`);
+        throw new Error(`Don't know that command: ${parts[0]}`);
       }
     } catch (error) {
       write(error.message, "warning");
@@ -997,7 +1011,7 @@
     try {
       const payload = JSON.parse(await file.text());
       sim = new Simulation(null, payload);
-      write("JSON save imported.", "success");
+      write("Save loaded.", "success");
       write(statusText(sim));
     } catch (error) {
       write(`Import failed: ${error.message}`, "warning");
@@ -1030,13 +1044,21 @@
     }
   });
 
+  document.querySelectorAll("[data-command]").forEach((button) => {
+    button.addEventListener("click", () => {
+      input.value = button.dataset.command;
+      form.requestSubmit();
+      input.focus();
+    });
+  });
+
   function boot() {
-    write("Pandemonium: Modern Ruin // administrative terminal", "success");
-    write("Command registry: status | abilities | npcs | cast <ability> | possess <npc-key> | export", "dim");
+    write("Pandemonium // New Carthage city terminal", "success");
+    write("Commands: help, status, abilities, npcs, cast, possess, exploit, wait.", "dim");
     write(statusText(sim));
     refreshHud();
-    input.focus();
   }
 
   boot();
+  document.documentElement.classList.add("is-ready");
 })();

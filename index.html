@@ -3,75 +3,143 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090505" />
     <title>Pandemonium: Modern Ruin</title>
     <meta
       name="description"
-      content="A browser terminal edition of Pandemonium: Modern Ruin, a deterministic city-ruin sandbox simulation."
+      content="A city-control game about bad plans, broken systems, and getting caught."
     />
     <link rel="icon" href="assets/sigil.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="assets/styles.css" />
   </head>
   <body>
-    <main class="shell" aria-label="Pandemonium terminal">
-      <section class="console-frame">
-        <header class="console-header">
-          <div class="brand">
-            <img class="brand-mark" src="assets/sigil.svg" alt="" width="42" height="42" />
-            <div>
-              <h1>Pandemonium: Modern Ruin</h1>
-              <p>Metropolitan Ruin Administration</p>
-            </div>
-          </div>
-          <div class="signal-strip" aria-label="system indicators">
-            <span id="signal-threat">THREAT 0.0</span>
-            <span id="signal-ruin">RUIN 14.4</span>
-            <span id="signal-turn">TURN 0</span>
-          </div>
-        </header>
+    <div class="site-shell">
+      <header class="site-header">
+        <div class="brand">
+          <img
+            class="brand-logo"
+            src="assets/pandemonium-logo.png"
+            alt="Pandemonium: Modern Ruin"
+            width="136"
+            height="136"
+          />
+        </div>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="https://github.com/clovicdev/pandemonium" target="_blank" rel="noreferrer">
+            View source
+            <svg aria-hidden="true" viewBox="0 0 16 16" width="14" height="14">
+              <path d="M4 12 12 4M5 4h7v7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+        </nav>
+      </header>
 
-        <div class="terminal-layout">
-          <aside class="side-panel" aria-label="city telemetry">
-            <div class="panel-block">
-              <h2>Ledger</h2>
+      <main>
+        <section class="page-intro" aria-labelledby="page-title">
+          <div class="intro-copy">
+            <p class="location-line"><span></span>New Carthage · city sim</p>
+            <h1 id="page-title">Wrecked City</h1>
+            <p class="intro-description">
+              Pick a weak spot. Push until something breaks.
+            </p>
+          </div>
+        </section>
+
+        <section class="signal-strip" aria-label="Live simulation readings">
+          <div class="signal-item">
+            <span class="signal-label">Threat</span>
+            <strong id="signal-threat" aria-live="polite">0.0</strong>
+          </div>
+          <div class="signal-item">
+            <span class="signal-label">Ruin</span>
+            <strong id="signal-ruin" aria-live="polite">14.4</strong>
+          </div>
+          <div class="signal-item">
+            <span class="signal-label">Turn</span>
+            <strong id="signal-turn" aria-live="polite">0</strong>
+          </div>
+        </section>
+
+        <section class="play-area" aria-label="Simulation workspace">
+          <aside class="city-panel" aria-label="City telemetry">
+            <section class="panel-block">
+              <div class="panel-heading">
+                <h2>City resources</h2>
+              </div>
               <dl class="resource-list">
-                <div><dt>Terror</dt><dd id="meter-terror">28.0</dd></div>
-                <div><dt>Corruption</dt><dd id="meter-corruption">20.0</dd></div>
-                <div><dt>Chaos</dt><dd id="meter-chaos">14.0</dd></div>
+                <div class="ledger-row"><dt><span class="resource-mark terror-mark"></span>Terror</dt><dd id="meter-terror">28.0</dd></div>
+                <div class="ledger-row"><dt><span class="resource-mark corruption-mark"></span>Corruption</dt><dd id="meter-corruption">20.0</dd></div>
+                <div class="ledger-row"><dt><span class="resource-mark chaos-mark"></span>Chaos</dt><dd id="meter-chaos">14.0</dd></div>
               </dl>
-            </div>
+            </section>
 
-            <div class="panel-block">
-              <h2>City</h2>
+            <section class="panel-block">
+              <div class="panel-heading">
+                <h2>City status</h2>
+                <span>Police</span>
+              </div>
               <dl class="city-list">
-                <div><dt>Condition</dt><dd id="meter-condition">Stable</dd></div>
-                <div><dt>Morale</dt><dd id="meter-morale">82.0</dd></div>
-                <div><dt>Response</dt><dd id="meter-response">Unseen Disturbance</dd></div>
+                <div class="ledger-row"><dt>City</dt><dd id="meter-condition">Holding</dd></div>
+                <div class="ledger-row"><dt>Mood</dt><dd id="meter-morale">82.0</dd></div>
+                <div class="ledger-row response-row"><dt>Police</dt><dd id="meter-response">No alert</dd></div>
               </dl>
-            </div>
+            </section>
 
-            <div class="panel-block">
-              <h2>Subsystems</h2>
-              <div id="subsystem-bars" class="subsystem-bars"></div>
-            </div>
+            <section class="panel-block panel-subsystems">
+              <div class="panel-heading">
+                <h2>City systems</h2>
+                <span>Health</span>
+              </div>
+              <div id="subsystem-bars" class="subsystem-bars" aria-live="polite"></div>
+            </section>
           </aside>
 
-          <section class="terminal-panel">
-            <div id="terminal-output" class="terminal-output" role="log" aria-live="polite"></div>
-            <form id="terminal-form" class="terminal-form" autocomplete="off">
-              <span class="prompt">admin@ruin:~$</span>
-              <input
-                id="terminal-input"
-                name="command"
-                type="text"
-                spellcheck="false"
-                aria-label="terminal command"
-              />
-              <button class="terminal-submit" type="submit" aria-label="execute command">↵</button>
-            </form>
-          </section>
-        </div>
-      </section>
-    </main>
+          <div class="terminal-column">
+            <div class="terminal-heading">
+              <div>
+                <h2>City terminal</h2>
+                <p>Pick a command or type one below.</p>
+              </div>
+              <span class="terminal-session"><span class="live-dot"></span>Online</span>
+            </div>
+
+            <div class="quick-commands" role="group" aria-label="Quick commands">
+              <span class="quick-label">Try one</span>
+              <button type="button" data-command="help">help</button>
+              <button type="button" data-command="status">status</button>
+              <button type="button" data-command="abilities">abilities</button>
+              <button type="button" data-command="demo">demo</button>
+            </div>
+
+            <section class="terminal-window" aria-label="Pandemonium command terminal">
+              <div class="terminal-topbar">
+                <span class="terminal-topbar-title"><span class="live-dot"></span>New Carthage / live</span>
+                <span class="terminal-topbar-meta">RUN 01</span>
+              </div>
+              <div id="terminal-output" class="terminal-output" role="log" aria-live="polite" aria-relevant="additions text" aria-label="Terminal output"></div>
+              <form id="terminal-form" class="terminal-form" autocomplete="off">
+                <label class="prompt" for="terminal-input">user@ruin:~$</label>
+                <input
+                  id="terminal-input"
+                  name="command"
+                  type="text"
+                  spellcheck="false"
+                  aria-label="Terminal command"
+                  placeholder="Type help for commands"
+                />
+                <button class="terminal-submit" type="submit">Run</button>
+              </form>
+              <p class="terminal-hint">Enter to run <span>·</span> ↑ / ↓ to recall a command</p>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>Pandemonium</span>
+        <span>Saves stay in this browser.</span>
+      </footer>
+    </div>
 
     <input id="import-file" type="file" accept="application/json" hidden />
     <script src="assets/app.js"></script>

@@ -18,11 +18,11 @@ class SubsystemKey(str, Enum):
     @property
     def label(self) -> str:
         return {
-            SubsystemKey.POWER: "Power Grid",
-            SubsystemKey.FINANCE: "Financial Markets",
-            SubsystemKey.COMMS: "Digital Communications",
-            SubsystemKey.HEALTH: "Public Health",
-            SubsystemKey.GOVERNMENT: "Government Response",
+            SubsystemKey.POWER: "Power",
+            SubsystemKey.FINANCE: "Markets",
+            SubsystemKey.COMMS: "Phones & Internet",
+            SubsystemKey.HEALTH: "Hospitals",
+            SubsystemKey.GOVERNMENT: "City Offices",
         }[self]
 
 
@@ -70,7 +70,7 @@ class Subsystem:
     @property
     def status_band(self) -> str:
         if self.integrity >= 76:
-            return "operational"
+            return "working"
         if self.integrity >= 51:
             return "strained"
         if self.integrity >= 26:

@@ -44,8 +44,8 @@ class AbilityCommand(ABC):
 
 class BlackoutCascade(AbilityCommand):
     key = "blackout"
-    name = "Blackout Cascade"
-    summary = "Overloads civic dependence on power and lets secondary failures bloom."
+    name = "Blackout"
+    summary = "Cut the power. Other systems may fail too."
     cost = ResourceDelta(corruption=2.0, chaos=5.0)
 
     def execute(self, context: AbilityContext, target: str | None = None) -> ActionReport:
@@ -57,11 +57,11 @@ class BlackoutCascade(AbilityCommand):
         delta = ResourceDelta(terror=6.0 + actual * 0.36, corruption=1.1, chaos=2.2 + comms * 0.08)
         city.resources.credit(delta)
         return ActionReport(
-            message="A district-wide dependency chain snaps under impossible timing.",
+            message="The lights go out. Your slideshow can wait.",
             events=(
                 GameEvent(
-                    title="Blackout cascade",
-                    detail=f"Power Grid integrity falls by {actual:.1f}; communications lose {comms:.1f}.",
+                    title="Blackout",
+                    detail=f"Power health falls by {actual:.1f}. Phone and internet health drops by {comms:.1f}.",
                     severity=6.0 + actual / 3.4,
                     visibility=6.5 + actual / 4.0,
                     resource_delta=delta.rounded(),
@@ -76,7 +76,7 @@ class BlackoutCascade(AbilityCommand):
 class MarketPanic(AbilityCommand):
     key = "market_panic"
     name = "Market Panic"
-    summary = "Turns confidence into contagion across financial and government systems."
+    summary = "Rattle the markets and the city office at once."
     cost = ResourceDelta(corruption=5.0, chaos=2.0)
 
     def execute(self, context: AbilityContext, target: str | None = None) -> ActionReport:
@@ -88,13 +88,12 @@ class MarketPanic(AbilityCommand):
         delta = ResourceDelta(terror=3.5 + actual * 0.22, corruption=3.0 + actual * 0.14, chaos=1.4)
         city.resources.credit(delta)
         return ActionReport(
-            message="Screens glow red, anchors stumble, and institutions begin correcting each other.",
+            message="The market panics. The anchors pretend it's fine.",
             events=(
                 GameEvent(
                     title="Market panic",
                     detail=(
-                        f"Financial Markets integrity falls by {actual:.1f}; "
-                        f"Government Response loses {gov:.1f}."
+                        f"Market health falls by {actual:.1f}. City offices lose {gov:.1f} health."
                     ),
                     severity=5.0 + actual / 3.8,
                     visibility=7.0 + actual / 5.0,
@@ -110,7 +109,7 @@ class MarketPanic(AbilityCommand):
 class SignalHaunting(AbilityCommand):
     key = "signal_haunting"
     name = "Signal Haunting"
-    summary = "Poisons the public channel with impossible coincidences and recursive dread."
+    summary = "Make the city's phones and networks act haunted."
     cost = ResourceDelta(terror=2.0, chaos=4.0)
 
     def execute(self, context: AbilityContext, target: str | None = None) -> ActionReport:
@@ -125,13 +124,13 @@ class SignalHaunting(AbilityCommand):
         delta = ResourceDelta(terror=4.2 + actual * 0.31, corruption=2.7 + compromised * 0.2, chaos=1.6)
         city.resources.credit(delta)
         return ActionReport(
-            message="The network remains online, which makes the haunting worse.",
+            message="The network works. It just sends weird stuff now.",
             events=(
                 GameEvent(
                     title="Signal haunting",
                     detail=(
-                        f"Digital Communications integrity falls by {actual:.1f}; "
-                        f"security slips by {compromised:.1f}."
+                        f"Phone and internet health falls by {actual:.1f}. "
+                        f"Security drops by {compromised:.1f}."
                     ),
                     severity=4.8 + actual / 4.0,
                     visibility=8.0 + actual / 4.2,
@@ -146,8 +145,8 @@ class SignalHaunting(AbilityCommand):
 
 class MiasmaOfRumors(AbilityCommand):
     key = "miasma"
-    name = "Miasma of Rumors"
-    summary = "Transforms ordinary symptoms and civic uncertainty into public-health dread."
+    name = "Rumor Wave"
+    summary = "Spread a rumor about a new outbreak."
     cost = ResourceDelta(terror=4.0, corruption=3.0)
 
     def execute(self, context: AbilityContext, target: str | None = None) -> ActionReport:
@@ -162,11 +161,11 @@ class MiasmaOfRumors(AbilityCommand):
         delta = ResourceDelta(terror=5.2 + health * 0.34, corruption=2.1, chaos=1.1 + gov * 0.08)
         city.resources.credit(delta)
         return ActionReport(
-            message="Queues lengthen, denials multiply, and rumor becomes its own weather.",
+            message="People rush the hospital. Nobody trusts the all-clear.",
             events=(
                 GameEvent(
-                    title="Miasma of rumors",
-                    detail=f"Public Health integrity falls by {health:.1f}; governance loses {gov:.1f}.",
+                    title="Rumors spread",
+                    detail=f"Hospital health falls by {health:.1f}. City offices lose {gov:.1f} health.",
                     severity=5.2 + health / 3.6,
                     visibility=6.2 + health / 4.5,
                     resource_delta=delta.rounded(),
@@ -180,8 +179,8 @@ class MiasmaOfRumors(AbilityCommand):
 
 class BureaucraticParalysis(AbilityCommand):
     key = "paralysis"
-    name = "Bureaucratic Paralysis"
-    summary = "Binds agencies in contradiction, slowing repairs and raising institutional distrust."
+    name = "Office Gridlock"
+    summary = "Keep city offices arguing instead of fixing things."
     cost = ResourceDelta(corruption=7.0, chaos=2.0)
 
     def execute(self, context: AbilityContext, target: str | None = None) -> ActionReport:
@@ -196,13 +195,13 @@ class BureaucraticParalysis(AbilityCommand):
         delta = ResourceDelta(terror=2.6 + damage * 0.18, corruption=4.2 + compromised * 0.25, chaos=1.8)
         city.resources.credit(delta)
         return ActionReport(
-            message="Every urgent memo contradicts the one before it.",
+            message="Every office has a plan. None of them match.",
             events=(
                 GameEvent(
-                    title="Bureaucratic paralysis",
+                    title="Office gridlock",
                     detail=(
-                        f"Government Response integrity falls by {damage:.1f}; "
-                        f"security loses {compromised:.1f}."
+                        f"City office health falls by {damage:.1f}. "
+                        f"Security drops by {compromised:.1f}."
                     ),
                     severity=5.0 + damage / 3.9,
                     visibility=5.0 + damage / 5.1,
@@ -217,8 +216,8 @@ class BureaucraticParalysis(AbilityCommand):
 
 class InfernalSurge(AbilityCommand):
     key = "surge"
-    name = "Infernal Surge"
-    summary = "Converts accumulated fear and influence into raw Chaos Energy."
+    name = "Chaos Surge"
+    summary = "Trade fear and corruption for Chaos."
     cost = ResourceDelta(terror=8.0, corruption=5.0)
 
     def execute(self, context: AbilityContext, target: str | None = None) -> ActionReport:
@@ -229,11 +228,11 @@ class InfernalSurge(AbilityCommand):
         delta = ResourceDelta(chaos=chaos_gain)
         city.resources.credit(delta)
         return ActionReport(
-            message="The ruin already sown is rendered into a hotter currency.",
+            message="One bad day. Plenty of Chaos.",
             events=(
                 GameEvent(
-                    title="Infernal surge",
-                    detail=f"Chaos Energy rises by {chaos_gain:.1f}.",
+                    title="Chaos surge",
+                    detail=f"Chaos rises by {chaos_gain:.1f}.",
                     severity=1.8 + chaos_gain / 8.0,
                     visibility=1.0,
                     resource_delta=delta.rounded(),
@@ -246,8 +245,8 @@ class InfernalSurge(AbilityCommand):
 
 class PossessCommand(AbilityCommand):
     key = "possess"
-    name = "Possess Key Human"
-    summary = "Attempts to seize a high-influence NPC for later systemic sabotage."
+    name = "Take Over"
+    summary = "Try to take over a person with power."
     cost = ResourceDelta(corruption=6.0, chaos=3.0)
     target_hint = "npc-key"
 
@@ -255,7 +254,7 @@ class PossessCommand(AbilityCommand):
         city = context.city
         npc = _target_npc(city, target)
         if npc.possessed:
-            raise InvalidTarget(f"{npc.name} is already possessed.")
+            raise InvalidTarget(f"{npc.name} is already under your control.")
         city.resources.pay(self.cost, reason=self.name)
         chance = npc.possession_chance(
             city.resources.corruption,
@@ -268,14 +267,11 @@ class PossessCommand(AbilityCommand):
             delta = ResourceDelta(corruption=1.5, chaos=0.8)
             city.resources.credit(delta)
             return ActionReport(
-                message=f"{npc.name} opens the door from the inside.",
+                message=f"{npc.name} is yours now. Their 3 p.m. meeting is still on.",
                 events=(
                     GameEvent(
-                        title=f"Possession: {npc.name}",
-                        detail=(
-                            f"{npc.role.label} compromised "
-                            f"({chance * 100:.0f}% chance, rolled {roll * 100:.0f}%)."
-                        ),
+                        title=f"{npc.name} is under your control",
+                        detail=f"{npc.role.label} taken over. Chance: {chance * 100:.0f}%." ,
                         severity=4.5,
                         visibility=1.8 + npc.suspicion / 28.0,
                         resource_delta=delta.rounded(),
@@ -287,11 +283,11 @@ class PossessCommand(AbilityCommand):
 
         npc.suspicion = min(100.0, npc.suspicion + 18.0)
         return ActionReport(
-            message=f"{npc.name} resists and starts noticing the shape of the attempt.",
+            message=f"{npc.name} says no. They know something's wrong.",
             events=(
                 GameEvent(
-                    title=f"Failed possession: {npc.name}",
-                    detail=f"The attempt fails ({chance * 100:.0f}% chance, rolled {roll * 100:.0f}%).",
+                    title=f"{npc.name} caught on",
+                    detail=f"Chance was {chance * 100:.0f}%. The try failed.",
                     severity=2.8,
                     visibility=2.0 + npc.suspicion / 26.0,
                     threat_delta=3.2,
@@ -304,8 +300,8 @@ class PossessCommand(AbilityCommand):
 
 class ExploitPossession(AbilityCommand):
     key = "exploit"
-    name = "Exploit Possession"
-    summary = "Uses a possessed NPC's authority to trigger cross-system failure from within."
+    name = "Pull Strings"
+    summary = "Use someone you took over to damage city systems."
     cost = ResourceDelta(chaos=2.0)
     target_hint = "npc-key"
 
@@ -313,9 +309,9 @@ class ExploitPossession(AbilityCommand):
         city = context.city
         npc = _target_npc(city, target)
         if not npc.possessed:
-            raise InvalidTarget(f"{npc.name} is not possessed.")
+            raise InvalidTarget(f"You haven't taken over {npc.name} yet.")
         if npc.cooldown > 0:
-            raise InvalidTarget(f"{npc.name} needs {npc.cooldown} more turn(s) before another exploit.")
+            raise InvalidTarget(f"Wait {npc.cooldown} more turn(s) before using {npc.name} again.")
         city.resources.pay(self.cost, reason=self.name)
 
         events: list[GameEvent] = []
@@ -329,8 +325,8 @@ class ExploitPossession(AbilityCommand):
             total_damage += actual
             events.append(
                 GameEvent(
-                    title=f"{npc.role.label} exploit hits {subsystem_key.label}",
-                    detail=f"{npc.name}'s authority cuts integrity by {actual:.1f}.",
+                    title=f"{subsystem_key.label} takes a hit",
+                    detail=f"{npc.name} cuts its health by {actual:.1f}.",
                     severity=4.2 + actual / 4.0,
                     visibility=3.0 + actual / 5.5 + npc.suspicion / 45.0,
                     subsystem=subsystem_key.value,
@@ -356,7 +352,7 @@ class ExploitPossession(AbilityCommand):
             )
         )
         return ActionReport(
-            message=f"{npc.name} weaponizes legitimacy without ever raising their voice.",
+            message=f"{npc.name} uses the job to mess with city systems.",
             events=tuple(events),
         )
 
@@ -380,7 +376,7 @@ class AbilityRegistry:
         try:
             return self._abilities[normalized]
         except KeyError as exc:
-            raise AbilityNotFound(f"Unknown ability: {key}") from exc
+            raise AbilityNotFound(f"Don't know that move: {key}") from exc
 
     def all(self) -> tuple[AbilityCommand, ...]:
         return tuple(self._abilities.values())
@@ -388,13 +384,12 @@ class AbilityRegistry:
 
 def _target_npc(city: City, target: str | None) -> NPC:
     if not target:
-        raise InvalidTarget("This ability requires an NPC key.")
+        raise InvalidTarget("Add a person's key. Try 'npcs' to see the list.")
     key = _normalize(target)
     try:
         return city.npcs[key]
     except KeyError as exc:
-        available = ", ".join(sorted(city.npcs))
-        raise InvalidTarget(f"Unknown NPC '{target}'. Available targets: {available}.") from exc
+        raise InvalidTarget(f"Can't find '{target}'. Try 'npcs' to see the keys.") from exc
 
 
 def _resistance_factor(city: City, subsystem_key: SubsystemKey) -> float:
@@ -407,24 +402,24 @@ def _resistance_factor(city: City, subsystem_key: SubsystemKey) -> float:
 def _exploit_flavor(npc: NPC) -> tuple[str, str]:
     return {
         NPCRole.TECH_CEO: (
-            "Platform consensus fracture",
-            "A trusted executive message shifts millions of private assumptions at once.",
+            "Leaked CEO message",
+            "One memo rattles the market.",
         ),
         NPCRole.PLANT_OPERATOR: (
-            "Operations handoff spiral",
-            "Routine authority turns minor maintenance ambiguity into cascading institutional delay.",
+            "Repair delay",
+            "One switch gets flipped. The repair crew is stuck.",
         ),
         NPCRole.POLITICAL_INFLUENCER: (
-            "Civic legitimacy shock",
-            "Followers receive certainty; everyone else receives consequences.",
+            "Rumor spreads",
+            "One post turns a rumor into a fight.",
         ),
         NPCRole.HOSPITAL_ADMIN: (
-            "Triage rumor storm",
-            "Scarce capacity and contradictory reassurance amplify each other.",
+            "Hospital panic",
+            "One bad update sends the hospital into a panic.",
         ),
         NPCRole.CENTRAL_BANKER: (
-            "Liquidity omen",
-            "A careful statement is heard as prophecy, accusation, and retreat.",
+            "Bank warning",
+            "One careful statement starts a loud week.",
         ),
     }[npc.role]
 

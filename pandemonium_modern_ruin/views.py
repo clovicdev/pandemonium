@@ -11,13 +11,13 @@ class TextRenderer:
         city = simulation.city
         threat = simulation.threat
         lines = [
-            f"{city.name} | Turn {city.turn} | Seed {simulation.seed}",
-            f"Condition: {city.condition.label} | Threat: {threat.stage.label} ({threat.score:.1f})",
-            f"Ruin: {city.ruin_score():.1f}/100 | Morale: {city.morale:.1f}/100",
-            f"Resources: {city.resources.as_compact_text()}",
+            f"{city.name} | Turn {city.turn} | Run {simulation.seed}",
+            f"City: {city.condition.label} | Police: {threat.stage.label} ({threat.score:.1f})",
+            f"Ruin: {city.ruin_score():.1f}/100 | Mood: {city.morale:.1f}/100",
+            f"You have: {city.resources.as_compact_text()}",
             "",
             _table(
-                ("Subsystem", "Integrity", "Trust", "Security", "Status"),
+                ("System", "Health", "Trust", "Security", "State"),
                 [
                     (
                         system.key.label,
@@ -35,26 +35,26 @@ class TextRenderer:
             lines.extend(
                 [
                     "",
-                    "Possessed assets: "
+                    "People under your control: "
                     + ", ".join(f"{npc.name} ({npc.key}, suspicion {npc.suspicion:.0f})" for npc in possessed),
                 ]
             )
         if city.escalations:
-            lines.extend(["", "Latest escalation:", city.escalations[-1]])
+            lines.extend(["", "Police:", city.escalations[-1]])
         return "\n".join(lines)
 
     def abilities(self, registry: AbilityRegistry) -> str:
         rows = []
         for ability in registry.all():
-            target = ability.target_hint or "-"
+            target = "person key" if ability.target_hint else "-"
             rows.append((ability.key, ability.cost_text(), target, ability.summary))
-        return _table(("Key", "Cost", "Target", "Effect"), rows)
+        return _table(("Key", "Cost", "Person", "What it does"), rows)
 
     def npcs(self, city: City) -> str:
         rows = []
         for npc in city.npcs.values():
             influence = ", ".join(f"{key.label} x{value:.2g}" for key, value in npc.influence.items())
-            state = "possessed" if npc.possessed else "free"
+            state = "under control" if npc.possessed else "free"
             rows.append(
                 (
                     npc.key,
@@ -66,12 +66,12 @@ class TextRenderer:
                     influence,
                 )
             )
-        return _table(("Key", "Name", "Role", "State", "Susp.", "CD", "Influence"), rows)
+        return _table(("Key", "Name", "Job", "State", "Alert", "Wait", "Systems"), rows)
 
     def outcome(self, outcome: TurnOutcome, simulation: Simulation) -> str:
         lines = [outcome.headline]
         for escalation in outcome.escalations:
-            lines.extend(["", f"Escalation: {escalation}"])
+            lines.extend(["", f"Police response: {escalation}"])
         notable = [event for event in outcome.events if _is_notable(event)]
         if notable:
             lines.append("")
@@ -82,33 +82,33 @@ class TextRenderer:
         lines.extend(
             [
                 "",
-                f"Threat {simulation.threat.score:.1f} ({simulation.threat.stage.label}) | "
+                f"Police {simulation.threat.score:.1f} ({simulation.threat.stage.label}) | "
                 f"Ruin {simulation.city.ruin_score():.1f}/100 | "
                 f"{simulation.city.resources.as_compact_text()}",
             ]
         )
         if outcome.victory:
             lines.append("")
-            lines.append("The city is ruined. Pandemonium has achieved modern dominion.")
+            lines.append("The city is yours. Most people had a worse night.")
         elif outcome.banished:
             lines.append("")
-            lines.append("Containment overwhelms your remaining Chaos Energy. You are banished.")
+            lines.append("They caught you. Your run is over.")
         return "\n".join(lines)
 
     def help(self) -> str:
         return "\n".join(
             [
-                "Commands:",
-                "  status                 Show city, resources, threat, and subsystem health.",
-                "  abilities              List demonic commands and costs.",
-                "  npcs                   List possession targets and influence vectors.",
-                "  cast <ability> [target] Execute an ability.",
-                "  possess <npc-key>      Shortcut for cast possess <npc-key>.",
-                "  exploit <npc-key>      Shortcut for cast exploit <npc-key>.",
-                "  wait                   Pass one turn and let the city evolve.",
-                "  save <path>            Write a JSON save file.",
-                "  load <path>            Load a JSON save file.",
-                "  quit                   Leave the simulation.",
+                "Try these:",
+                "  status                 Show the city.",
+                "  abilities              List moves and costs.",
+                "  npcs                   List people and their keys.",
+                "  cast <move> [person]   Use a move.",
+                "  possess <person>       Take over a person.",
+                "  exploit <person>       Use them to break systems.",
+                "  wait                   Pass a turn.",
+                "  save <path>            Save this run.",
+                "  load <path>            Load a saved run.",
+                "  quit                   Quit the game.",
             ]
         )
 
